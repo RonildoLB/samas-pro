@@ -1,6 +1,6 @@
 {
-  "name": "app",
-  "short_name": "app",
+  "name": "SAMAS",
+  "short_name": "SAMAS",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
