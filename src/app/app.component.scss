@@ -5,3 +5,9 @@
   /* Altera a cor do texto do header (opcional) */
   --color: #ffffff; 
 }
+
+.page-content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}

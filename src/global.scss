@@ -27,7 +27,6 @@ body {
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
   // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
 
@@ -35,6 +34,12 @@ body {
   margin: 0;
   height: 100%;
 }
+
+ion-app,
+ion-content {
+  
+}
+
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -71,4 +76,4 @@ body {
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-// @import '@ionic/angular/css/palettes/dark.system.css';
+//@import '@ionic/angular/css/palettes/dark.system.css';

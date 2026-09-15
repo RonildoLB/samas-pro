@@ -1,6 +1,6 @@
 <ion-menu side="start" contentId="main-content">
 
-  <ion-content class="ion-padding">This is the menu content.</ion-content>
+  <ion-content class="ion-padding">Este é o conteúdo do menu.</ion-content>
 </ion-menu>
 <div class="ion-page" id="main-content">
   <ion-header>
@@ -28,12 +28,7 @@
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding" 
-  style="background-color: red;
-  display: flex; justify-content: center; align-items: center;"> 
-    <div style="display: flex; justify-content: center; align-items: center;">
-      
-      
-    </div>
-  </ion-content>
+  <main class="page-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>
