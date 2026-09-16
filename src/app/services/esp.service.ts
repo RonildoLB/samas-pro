@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { timeout } from 'rxjs';
 
 // Estrutura de um agendamento cru, como vem no array "schedulings" do /status
 export interface SchedulingRaw {
@@ -74,8 +75,18 @@ export class EspService {
   // Retorna a lista de todos os nós (válvulas) da malha. Além de trazer o
   // status, essa chamada também avisa o Mestre a adiar o adormecimento
   // dos nós em 10s (efeito colateral do lado do firmware).
+  // getStatus() {
+  //   return this.http.get<NodeStatus[]>(`${this.baseUrl}/status`);
+  // }
+
   getStatus() {
-    return this.http.get<NodeStatus[]>(`${this.baseUrl}/status`);
+    const headers = new HttpHeaders({
+      'Connection': 'close'
+    });
+
+    return this.http.get<NodeStatus[]>(`${this.baseUrl}/status`, { headers }).pipe(
+      timeout(5000)
+    );
   }
 
   // Aciona um pulso em tempo real num nó/canal específico.

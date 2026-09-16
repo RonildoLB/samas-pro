@@ -1,5 +1,6 @@
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonMenu, IonButton, 
-  IonItem, IonMenuToggle, IonRadio, IonRadioGroup, IonSpinner
+  IonItem, IonMenuToggle, IonRadio, IonRadioGroup, IonSpinner,
+  IonProgressBar
 } from '@ionic/angular';
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
@@ -82,7 +83,7 @@ interface ValvulaView {
     IonButton, IonContent, IonHeader, IonItem, IonMenu, IonMenuToggle,
     IonRadio, IonRadioGroup, IonTitle, IonToolbar, FormsModule, 
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
-    IonSpinner
+    IonSpinner, IonProgressBar
   ],
 })
 

@@ -1,32 +1,17 @@
 <ion-content [fullscreen]="true">
   @if (connected) {
-    
-          <ion-spinner name="crescent"></ion-spinner>
+    <ion-progress-bar type="indeterminate" color="medium"></ion-progress-bar>
+  }
 
+  @for (valvula of valvulas; track valvula.id) {
     <ion-card color="light">
       <ion-card-header style="background-color: green; color: white; font-size: small;">
         <ion-card-title>Poste 1</ion-card-title>
+        <!--<span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>-->
       </ion-card-header>
 
-      <ion-card-content class="center">
-          <div class="card" style="width: 100%;">
-      <div class="card-body" style="text-align: center; color: #5f6368;">
-        Buscando válvulas na malha...
-      </div>
-    </div>
-      </ion-card-content>
-    </ion-card>
-  }
-
-    @for (valvula of valvulas; track valvula.id) {
-    <div class="card">
-      <div class="card-header bg-green" style="display: flex; justify-content: space-between; align-items: center;">
-        <span>{{ valvula.nome }}</span>
-        <span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>
-      </div>
-      <div class="card-body">
-
-        <div style="display: grid; font-size: 0.825em; color: #555; text-align: left; margin-bottom: 12px;">
+      <ion-card-content style="flex-direction: column; margin-top: 13px;">
+        <div style="display: grid; font-size: small; color: #555; text-align: left; margin-bottom: 8px;">
           <span>Relógio atualizado:
             <strong [style.color]="valvula.clockAtualizado ? '#1908af' : '#dc3545'">
               {{ valvula.clockAtualizado ? valvula.clock : 'Não atualizado' }}
@@ -34,8 +19,9 @@
           </span>
         </div>
 
-        <!-- CANAL 1 -->
-        <div class="channel-block">
+        <div class="card" style="width: 100%;">
+          <div class="card-body" style="text-align: center; color: #5f6368;">
+            <div class="channel-block">
           <div class="channel-title">
             <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
                  alt="Status Canal 1"
@@ -195,8 +181,9 @@
           <div class="toggle" [class.switch-on]="valvula.canal2Visivel" [class.switch-off]="!valvula.canal2Visivel"
                (click)="toggleCanal2Visivel(valvula)"></div>
         </div>
-
-      </div>
-    </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
   }
 </ion-content>
