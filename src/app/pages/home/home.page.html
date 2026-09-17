@@ -6,7 +6,7 @@
   @for (valvula of valvulas; track valvula.id) {
     <ion-card color="light">
       <ion-card-header style="background-color: green; color: white; font-size: small;">
-        <ion-card-title>Poste 1</ion-card-title>
+        <ion-card-title>POSTE {{ valvula.id }}</ion-card-title>
         <!--<span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>-->
       </ion-card-header>
 
@@ -51,7 +51,7 @@
 
           <div class="schedule-section">
             <div class="schedule-title">
-              <img src="assets/time-management.png" alt="Agendamento">
+              <img src="/assets/time-management.png" alt="Agendamento">
               Agendamento - Canal 1
             </div>
             <div class="schedule-controls">
@@ -77,13 +77,13 @@
                       <div class="pair-info">
                         @if (par.idLigar !== undefined) {
                           <div class="time-row">
-                            <span class="badge badge-green">LIGAR</span>
+                            <span class="badge badge-green">LIGA</span>
                             <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
                           </div>
                         }
                         @if (par.idDesligar !== undefined) {
                           <div class="time-row">
-                            <span class="badge badge-red">DESLIGAR</span>
+                            <span class="badge badge-red">DESLIGA</span>
                             <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
                           </div>
                         }
@@ -129,7 +129,7 @@
 
             <div class="schedule-section">
               <div class="schedule-title">
-                <img src="assets/time-management.png" alt="Agendamento">
+                 <img src="/assets/time-management.png" alt="Agendamento">
                 Agendamento - Canal 2
               </div>
               <div class="schedule-controls">
@@ -155,13 +155,13 @@
                         <div class="pair-info">
                           @if (par.idLigar !== undefined) {
                             <div class="time-row">
-                              <span class="badge badge-green">LIGAR</span>
+                              <span class="badge badge-green">LIGA</span>
                               <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
                             </div>
                           }
                           @if (par.idDesligar !== undefined) {
                             <div class="time-row">
-                              <span class="badge badge-red">DESLIGAR</span>
+                              <span class="badge badge-red">DESLIGA</span>
                               <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
                             </div>
                           }
