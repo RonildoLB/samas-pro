@@ -1,6 +1,6 @@
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonMenu, IonButton, 
   IonItem, IonMenuToggle, IonRadio, IonRadioGroup, IonSpinner,
-  IonProgressBar
+  IonProgressBar, IonToggle
 } from '@ionic/angular';
 import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
@@ -83,7 +83,7 @@ interface ValvulaView {
     IonButton, IonContent, IonHeader, IonItem, IonMenu, IonMenuToggle,
     IonRadio, IonRadioGroup, IonTitle, IonToolbar, FormsModule, 
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
-    IonSpinner, IonProgressBar
+    IonSpinner, IonProgressBar, IonToggle
   ],
 })
 
@@ -272,12 +272,17 @@ export class HomePage implements OnInit, OnDestroy {
     return valor === null ? true : valor === '1';
   }
 
-  toggleCanal2Visivel(valvula: ValvulaView) {
-    valvula.canal2Visivel = !valvula.canal2Visivel;
-    if (this.isBrowser) {
-      localStorage.setItem(CANAL2_VISIVEL_PREFIXO + valvula.id, valvula.canal2Visivel ? '1' : '0');
-    }
+  toggleCanal2Visivel(event: CustomEvent, valvula: ValvulaView) {
+  // Atualiza o estado da válvula com o valor vindo do toggle (true ou false)
+  valvula.canal2Visivel = event.detail.checked;
+
+  if (this.isBrowser) {
+    localStorage.setItem(
+      CANAL2_VISIVEL_PREFIXO + valvula.id,
+      valvula.canal2Visivel ? '1' : '0'
+    );
   }
+}
 
   acionarMotorProgresso(valvula: ValvulaView, direcao: 'cw' | 'acw', canal: 1 | 2) {
     const loadingKey = this.chaveLoading(direcao, canal);

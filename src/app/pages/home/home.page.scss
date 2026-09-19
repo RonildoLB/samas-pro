@@ -188,7 +188,6 @@ ion-card-title {
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
-  margin-top: 18px; /* Alinha visualmente com os inputs */
   transition: background-color 0.3s;
 }
 
@@ -434,10 +433,8 @@ ion-card-title {
 .channel-toggle-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1rem;
   border-top: 1px solid #f1f3f4;
-  margin-top: 12px;
-  padding-top: 10px;
   font-size: 0.825em;
   color: #555;
 }
