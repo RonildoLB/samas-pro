@@ -82,9 +82,13 @@
                       <input type="time" [(ngModel)]="valvula.novoHoraDesligarC1">
                     </div>
 
-                    <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
+                    <!-- <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
                       <span class="material-icons">+</span>
-                    </button>
+                    </button> -->
+
+                    <ion-button size="default" shape="round" (click)="adicionarAgendamento(valvula, 1)">
+                      <ion-icon [icon]="addIcon" slot="icon-only" size="medium" style="transform: rotate(45deg);"></ion-icon>
+                    </ion-button>
                   </div>
 
                   @if (valvula.agendamentosCanal1.length > 0) {
@@ -135,11 +139,16 @@
             <div class="card" style="width: 100%;">
             <div class="card-body" style="text-align: center; color: #5f6368;">
             <div class="channel-block channel-block-2">
-              <div class="channel-title">
-                <img [src]="valvula.estadoCanal2 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
-                    alt="Status Canal 2"
+              <div class="channel-title" style="flex-direction: column;">
+                <ion-card-title style="font-weight: 600; font-size: 1.25rem; color: #202124; text-align: center;">
+                    Válvula B
+                  </ion-card-title>
+                <ion-card-subtitle style="display: flex; align-items: end; gap: 8px;">   
+                  <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
+                    alt="Status Canal 1"
                     class="gif-irrigacao-sm">
-                <span>Canal 2</span>
+                  <div style="text-align: left;">A válvula {{ valvula.id }}-B está LIGADA</div>
+                </ion-card-subtitle>
               </div>
 
               @if (nodesAcordados) {
@@ -170,16 +179,57 @@
                 <div class="schedule-controls">
                   <div class="time-input">
                     <label>Ligar às:</label>
+                    <!-- <ion-datetime-button datetime="datetime"></ion-datetime-button>
+
+                    <ion-modal [keepContentsMounted]="true">
+                      <ng-template>
+                        <ion-datetime
+                          id="datetime"
+                          presentation="time"
+                          [formatOptions]="{
+                            date: {
+                              month: '2-digit',
+                              day: '2-digit',
+                            },
+                            time: {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            },
+                          }"
+                        ></ion-datetime>
+                      </ng-template>
+                    </ion-modal> -->
                     <input type="time" [(ngModel)]="valvula.novoHoraLigarC2">
                   </div>
                   <div class="time-input">
                     <label>Desligar às:</label>
+                    <!-- <ion-datetime-button datetime="datetime"></ion-datetime-button>
+
+                    <ion-modal [keepContentsMounted]="true">
+                      <ng-template>
+                        <ion-datetime
+                          id="datetime"
+                          presentation="time"
+                          [formatOptions]="{
+                            date: {
+                              month: '2-digit',
+                              day: '2-digit',
+                            },
+                            time: {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            },
+                          }"
+                        ></ion-datetime>
+                      </ng-template>
+                    </ion-modal> -->
+                    
                     <input type="time" [(ngModel)]="valvula.novoHoraDesligarC2">
                   </div>
 
-                  <button class="btn-add" (click)="adicionarAgendamento(valvula, 2)">
-                    <span class="material-icons">+</span>
-                  </button>
+                  <ion-button size="default" shape="round" (click)="adicionarAgendamento(valvula, 2)">
+                    <ion-icon [icon]="addIcon" slot="icon-only" size="medium" style="transform: rotate(45deg);"></ion-icon>
+                  </ion-button>
                 </div>
 
                 @if (valvula.agendamentosCanal2.length > 0) {

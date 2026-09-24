@@ -1,11 +1,14 @@
-import { IonContent, IonProgressBar, IonToggle, IonIcon, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton } from '@ionic/angular';
+import { IonContent, IonProgressBar, IonToggle, IonIcon, 
+  IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
+  IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, IonModal
+} from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.service';
 import { FormsModule } from '@angular/forms';
 import { timer, Subscription, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
-import { settingsOutline } from 'ionicons/icons';
+import { settingsOutline, close } from 'ionicons/icons';
 import { NgxColorsComponent, NgxColorsTriggerDirective } from 'ngx-colors';
 
 const CANAL2_VISIVEL_PREFIXO = 'samas_canal2_visivel_no_';
@@ -82,13 +85,15 @@ interface ValvulaView {
   imports: [IonContent, IonButton, FormsModule,
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
     IonProgressBar, IonToggle, IonIcon, NgxColorsComponent,
-    NgxColorsTriggerDirective
+    NgxColorsTriggerDirective, IonDatetime, IonDatetimeButton,
+    IonModal
   ],
 })
 
 export class HomePage implements OnInit, OnDestroy {
   // VARIÁVEIS
   settingsSharpIcon = settingsOutline;
+  addIcon = close;
   connected = false;
   valvulas: ValvulaView[] = [];
   dataEsp: string = '';

@@ -155,7 +155,7 @@ ion-card-title {
 
 .schedule-controls {
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: space-between;
   gap: 10px;
 }
@@ -337,12 +337,9 @@ ion-card-title {
 
 /* Botão de Adicionar (+) */
 .btn-add {
-  font-size: x-large;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
   background-color: #1a73e8;
   color: white;
   border: none;
