@@ -6,198 +6,227 @@
 
   @for (valvula of valvulas; track valvula.id) {
     <ion-card color="light">
-      <ion-card-header style="background-color: green; color: white; font-size: small;">
+      <ion-card-header class="card-header" [style.background]="valvula.color">
         <ion-card-title>POSTE {{ valvula.id }}</ion-card-title>
+        <ion-icon [icon]="settingsSharpIcon" size="small" (click)="alternarConfiguracao(valvula)"></ion-icon>
         <!--<span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>-->
       </ion-card-header>
 
       <ion-card-content style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 13px;">
-        
-
-        <div class="card" style="width: 100%;">
-          <div class="card-body" style="text-align: center; color: #5f6368;">
-            <div class="channel-block">
-          <div class="channel-title">
-            <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
-                 alt="Status Canal 1"
-                 class="gif-irrigacao-sm">
-            <span>Canal 1</span>
-          </div>
-
-          @if (nodesAcordados) {
-            <div class="button-group">
-              <button class="btn btn-success relative"
-                      [disabled]="motorDesabilitado(valvula, 1)"
-                      (click)="acionarMotorProgresso(valvula, 'cw', 1)">
-                <span class="btn-text">{{ valvula.loadingLigarC1 ? 'LIGANDO...' : 'LIGAR' }}</span>
-                <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC1"></div>
-              </button>
-
-              <button class="btn btn-danger relative"
-                      [disabled]="motorDesabilitado(valvula, 1)"
-                      (click)="acionarMotorProgresso(valvula, 'acw', 1)">
-                <span class="btn-text">{{ valvula.loadingDesligarC1 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>
-                <div class="progress-bar" [class.active-progress]="valvula.loadingDesligarC1"></div>
-              </button>
-            </div>
-          } @else {
-            <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
-          }
-
-          <div class="schedule-section">
-            <div class="schedule-title">
-              <img src="/assets/time-management.png" alt="Agendamento">
-              Agendamento - Canal 1
-            </div>
-            <div class="schedule-controls">
-              <div class="time-input">
-                <label>Ligar às:</label>
-                <input type="time" [(ngModel)]="valvula.novoHoraLigarC1">
-              </div>
-              <div class="time-input">
-                <label>Desligar às:</label>
-                <input type="time" [(ngModel)]="valvula.novoHoraDesligarC1">
-              </div>
-
-              <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
-                <span class="material-icons">+</span>
-              </button>
-            </div>
-
-            @if (valvula.agendamentosCanal1.length > 0) {
-              <div class="schedule-list">
-                <ul>
-                  @for (par of valvula.agendamentosCanal1; track $index) {
-                    <li class="pair-card">
-                      <div class="pair-info">
-                        @if (par.idLigar !== undefined) {
-                          <div class="time-row">
-                            <span class="badge badge-green">LIGA</span>
-                            <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
-                          </div>
-                        }
-                        @if (par.idDesligar !== undefined) {
-                          <div class="time-row">
-                            <span class="badge badge-red">DESLIGA</span>
-                            <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
-                          </div>
-                        }
-                      </div>
-                      <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">Excluir</button>
-                    </li>
-                  }
-                </ul>
-              </div>
-            }
-          </div>
-        </div>
-        </div>
-        </div>
-
-        
+        @if(valvula.showConfig) {
+          <div class="center" style="justify-content: space-between; align-items: center; font-size: small; color: #555; text-align: left;">
+            <ngx-colors ngxColorsTrigger [(ngModel)]="valvula.color"
+              (ngModelChange)="salvarCorValvula($event, valvula)"></ngx-colors>
             
+            <span>
+              <strong [style.color]="valvula.clockAtualizado ? '#1908af' : '#dc3545'">
+                {{ valvula.clockAtualizado ? valvula.clock : 'Não atualizado' }}
+              </strong>
+            </span>
 
-        <!-- CANAL 2 (condicional) -->
-        @if (valvula.canal2Visivel) {
-          <div class="card" style="width: 100%;">
-          <div class="card-body" style="text-align: center; color: #5f6368;">
-          <div class="channel-block channel-block-2">
-            <div class="channel-title">
-              <img [src]="valvula.estadoCanal2 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
-                   alt="Status Canal 2"
-                   class="gif-irrigacao-sm">
-              <span>Canal 2</span>
-            </div>
-
-            @if (nodesAcordados) {
-              <div class="button-group">
-                <button class="btn btn-success relative"
-                        [disabled]="motorDesabilitado(valvula, 2)"
-                        (click)="acionarMotorProgresso(valvula, 'cw', 2)">
-                  <span class="btn-text">{{ valvula.loadingLigarC2 ? 'LIGANDO...' : 'LIGAR' }}</span>
-                  <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC2"></div>
-                </button>
-
-                <button class="btn btn-danger relative"
-                        [disabled]="motorDesabilitado(valvula, 2)"
-                        (click)="acionarMotorProgresso(valvula, 'acw', 2)">
-                  <span class="btn-text">{{ valvula.loadingDesligarC2 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>
-                  <div class="progress-bar" [class.active-progress]="valvula.loadingDesligarC2"></div>
-                </button>
-              </div>
-            } @else {
-              <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
-            }
-
-            <div class="schedule-section">
-              <div class="schedule-title">
-                 <img src="/assets/time-management.png" alt="Agendamento">
-                Agendamento - Canal 2
-              </div>
-              <div class="schedule-controls">
-                <div class="time-input">
-                  <label>Ligar às:</label>
-                  <input type="time" [(ngModel)]="valvula.novoHoraLigarC2">
-                </div>
-                <div class="time-input">
-                  <label>Desligar às:</label>
-                  <input type="time" [(ngModel)]="valvula.novoHoraDesligarC2">
-                </div>
-
-                <button class="btn-add" (click)="adicionarAgendamento(valvula, 2)">
-                  <span class="material-icons">+</span>
-                </button>
-              </div>
-
-              @if (valvula.agendamentosCanal2.length > 0) {
-                <div class="schedule-list">
-                  <ul>
-                    @for (par of valvula.agendamentosCanal2; track $index) {
-                      <li class="pair-card">
-                        <div class="pair-info">
-                          @if (par.idLigar !== undefined) {
-                            <div class="time-row">
-                              <span class="badge badge-green">LIGA</span>
-                              <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
-                            </div>
-                          }
-                          @if (par.idDesligar !== undefined) {
-                            <div class="time-row">
-                              <span class="badge badge-red">DESLIGA</span>
-                              <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
-                            </div>
-                          }
-                        </div>
-                        <button class="btn-icon" (click)="deletarDupla(valvula, par, 2)">Excluir</button>
-                      </li>
-                    }
-                  </ul>
-                </div>
-              }
-            </div>
-          </div>
-          </div>
+            <ion-toggle 
+              [checked]="valvula.canal2Visivel" 
+              (ionChange)="toggleCanal2Visivel($event, valvula)">
+            </ion-toggle>
           </div>
         }
         
-        <div class="center" style="justify-content: space-between; align-items: center; font-size: small; color: #555; text-align: left;">
-          <span>Relógio atualizado:
-            <strong [style.color]="valvula.clockAtualizado ? '#1908af' : '#dc3545'">
-              {{ valvula.clockAtualizado ? valvula.clock : 'Não atualizado' }}
-            </strong>
-          </span>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+          <div class="card" style="width: 100%;">
+            <div class="card-body" style="text-align: center; color: #5f6368;">
+              <div class="channel-block">
+                <div class="channel-title" style="flex-direction: column;">
+                  <ion-card-title style="font-weight: 600; font-size: 1.25rem; color: #202124; text-align: center;">
+                      Válvula A
+                    </ion-card-title>
+                  <ion-card-subtitle style="display: flex; align-items: end; gap: 8px;">   
+                    <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
+                      alt="Status Canal 1"
+                      class="gif-irrigacao-sm">
+                    <div style="text-align: left;">A válvula {{ valvula.id }}-A está LIGADA</div>
+                  </ion-card-subtitle>
+                </div>
 
-          
+                @if (nodesAcordados) {
+                  <div class="button-group">
+                    <button class="btn btn-success relative"
+                            [disabled]="motorDesabilitado(valvula, 1)"
+                            (click)="acionarMotorProgresso(valvula, 'cw', 1)">
+                      <span class="btn-text">{{ valvula.loadingLigarC1 ? 'LIGANDO...' : 'LIGAR' }}</span>
+                      <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC1"></div>
+                    </button>
 
-          <ion-toggle 
-            [checked]="valvula.canal2Visivel" 
-            (ionChange)="toggleCanal2Visivel($event, valvula)">
-          </ion-toggle>
+                    <button class="btn btn-danger relative"
+                            [disabled]="motorDesabilitado(valvula, 1)"
+                            (click)="acionarMotorProgresso(valvula, 'acw', 1)">
+                      <span class="btn-text">{{ valvula.loadingDesligarC1 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>
+                      <div class="progress-bar" [class.active-progress]="valvula.loadingDesligarC1"></div>
+                    </button>
+                  </div>
+                } @else {
+                  <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
+                }
+
+                <div class="schedule-section">
+                  <div class="schedule-title">
+                    <img src="/assets/time-management.png" alt="Agendamento">
+                    Agendamento - Canal 1
+                  </div>
+                  <div class="schedule-controls">
+                    <div class="time-input">
+                      <label>Ligar às:</label>
+                      <input type="time" [(ngModel)]="valvula.novoHoraLigarC1">
+                    </div>
+                    <div class="time-input">
+                      <label>Desligar às:</label>
+                      <input type="time" [(ngModel)]="valvula.novoHoraDesligarC1">
+                    </div>
+
+                    <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
+                      <span class="material-icons">+</span>
+                    </button>
+                  </div>
+
+                  @if (valvula.agendamentosCanal1.length > 0) {
+                    <div class="schedule-list">
+                      <ul>
+                        @for (par of valvula.agendamentosCanal1; track $index) {
+                          <li class="pair-card">
+                            <div class="pair-info">
+                              @if (par.idLigar !== undefined) {
+                                <div class="time-row">
+                                  <span class="badge badge-green">LIGA</span>
+                                  <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
+                                </div>
+                              }
+                              @if (par.idDesligar !== undefined) {
+                                <div class="time-row">
+                                  <span class="badge badge-red">DESLIGA</span>
+                                  <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
+                                </div>
+                              }
+                            </div>
+                            <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">Excluir</button>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                  <defs>
+                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                  </defs>
+                  <g class="parallax">
+                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
+                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
+                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
+                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
+                  </g>
+                </svg>
+            </div>
+          </div>
+
+          <!-- CANAL 2 (condicional) -->
+          @if (valvula.canal2Visivel) {
+            <div class="card" style="width: 100%;">
+            <div class="card-body" style="text-align: center; color: #5f6368;">
+            <div class="channel-block channel-block-2">
+              <div class="channel-title">
+                <img [src]="valvula.estadoCanal2 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
+                    alt="Status Canal 2"
+                    class="gif-irrigacao-sm">
+                <span>Canal 2</span>
+              </div>
+
+              @if (nodesAcordados) {
+                <div class="button-group">
+                  <button class="btn btn-success relative"
+                          [disabled]="motorDesabilitado(valvula, 2)"
+                          (click)="acionarMotorProgresso(valvula, 'cw', 2)">
+                    <span class="btn-text">{{ valvula.loadingLigarC2 ? 'LIGANDO...' : 'LIGAR' }}</span>
+                    <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC2"></div>
+                  </button>
+
+                  <button class="btn btn-danger relative"
+                          [disabled]="motorDesabilitado(valvula, 2)"
+                          (click)="acionarMotorProgresso(valvula, 'acw', 2)">
+                    <span class="btn-text">{{ valvula.loadingDesligarC2 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>
+                    <div class="progress-bar" [class.active-progress]="valvula.loadingDesligarC2"></div>
+                  </button>
+                </div>
+              } @else {
+                <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
+              }
+
+              <div class="schedule-section">
+                <div class="schedule-title">
+                  <img src="/assets/time-management.png" alt="Agendamento">
+                  Agendamento - Canal 2
+                </div>
+                <div class="schedule-controls">
+                  <div class="time-input">
+                    <label>Ligar às:</label>
+                    <input type="time" [(ngModel)]="valvula.novoHoraLigarC2">
+                  </div>
+                  <div class="time-input">
+                    <label>Desligar às:</label>
+                    <input type="time" [(ngModel)]="valvula.novoHoraDesligarC2">
+                  </div>
+
+                  <button class="btn-add" (click)="adicionarAgendamento(valvula, 2)">
+                    <span class="material-icons">+</span>
+                  </button>
+                </div>
+
+                @if (valvula.agendamentosCanal2.length > 0) {
+                  <div class="schedule-list">
+                    <ul>
+                      @for (par of valvula.agendamentosCanal2; track $index) {
+                        <li class="pair-card">
+                          <div class="pair-info">
+                            @if (par.idLigar !== undefined) {
+                              <div class="time-row">
+                                <span class="badge badge-green">LIGA</span>
+                                <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
+                              </div>
+                            }
+                            @if (par.idDesligar !== undefined) {
+                              <div class="time-row">
+                                <span class="badge badge-red">DESLIGA</span>
+                                <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
+                              </div>
+                            }
+                          </div>
+                          <button class="btn-icon" (click)="deletarDupla(valvula, par, 2)">Excluir</button>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+            </div>
+
+            
+          </div>
+          <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+              <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+              </defs>
+              <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
+              </g>
+            </svg>
+          </div>
+          </div>
+        }
         </div>
-        <!-- <div class="channel-toggle-row">
-          <span>Mostrar Canal 2</span>
-          
-        </div> -->
       </ion-card-content>
     </ion-card>
   }

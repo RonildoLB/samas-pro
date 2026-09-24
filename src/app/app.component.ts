@@ -40,8 +40,7 @@ import { logoIonic } from 'ionicons/icons';
     IonTitle, 
     IonButtons, 
     IonMenuToggle,
-    IonContent, 
-    IonMenu, 
+    IonContent,
     IonIcon
   ],
   templateUrl: './app.component.html',

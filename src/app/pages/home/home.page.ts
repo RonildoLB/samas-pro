@@ -1,17 +1,15 @@
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonMenu, IonButton, 
-  IonItem, IonMenuToggle, IonRadio, IonRadioGroup, IonSpinner,
-  IonProgressBar, IonToggle
-} from '@ionic/angular';
-import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/angular';
+import { IonContent, IonProgressBar, IonToggle, IonIcon, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.service';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
 import { timer, Subscription, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
+import { settingsOutline } from 'ionicons/icons';
+import { NgxColorsComponent, NgxColorsTriggerDirective } from 'ngx-colors';
 
 const CANAL2_VISIVEL_PREFIXO = 'samas_canal2_visivel_no_';
+const COR_VALVULA_PREFIXO = 'samas_cor_valvula_no_';
 const TEMPO_PROGRESSO_MS = 5000;
 const INTERVALO_STATUS_MS = 5000;
 
@@ -72,6 +70,8 @@ interface ValvulaView {
   novoHoraDesligarC1: string;
   novoHoraLigarC2: string;
   novoHoraDesligarC2: string;
+  color: string;
+  showConfig: boolean;
 }
 /*-------------------------------------*/
 
@@ -79,16 +79,16 @@ interface ValvulaView {
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonMenu,
-    IonButton, IonContent, IonHeader, IonItem, IonMenu, IonMenuToggle,
-    IonRadio, IonRadioGroup, IonTitle, IonToolbar, FormsModule, 
+  imports: [IonContent, IonButton, FormsModule,
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
-    IonSpinner, IonProgressBar, IonToggle
+    IonProgressBar, IonToggle, IonIcon, NgxColorsComponent,
+    NgxColorsTriggerDirective
   ],
 })
 
 export class HomePage implements OnInit, OnDestroy {
   // VARIÁVEIS
+  settingsSharpIcon = settingsOutline;
   connected = false;
   valvulas: ValvulaView[] = [];
   dataEsp: string = '';
@@ -182,6 +182,8 @@ export class HomePage implements OnInit, OnDestroy {
         clockAtualizado: no.clock_updated,
         clock: no.clock,
         canal2Visivel: anterior ? anterior.canal2Visivel : this.lerCanal2Visivel(no.ID_valve),
+        color: anterior?.color ?? this.lerCorValvula(no.ID_valve),
+        showConfig: anterior?.showConfig ?? false,
 
         agendamentosCanal1: this.reconciliarComPendentes(no.ID_valve, 1, this.agruparEmDuplas(canal1)),
         agendamentosCanal2: this.reconciliarComPendentes(no.ID_valve, 2, this.agruparEmDuplas(canal2)),
@@ -270,6 +272,23 @@ export class HomePage implements OnInit, OnDestroy {
     if (!this.isBrowser) return true;
     const valor = localStorage.getItem(CANAL2_VISIVEL_PREFIXO + idNo);
     return valor === null ? true : valor === '1';
+  }
+
+  private lerCorValvula(idNo: number): string {
+    if (!this.isBrowser) return 'green';
+    return localStorage.getItem(COR_VALVULA_PREFIXO + idNo) || 'green';
+  }
+
+  alternarConfiguracao(valvula: ValvulaView) {
+    valvula.showConfig = !valvula.showConfig;
+  }
+
+  salvarCorValvula(cor: string, valvula: ValvulaView) {
+    valvula.color = cor || 'green';
+    if (this.isBrowser) {
+      localStorage.setItem(COR_VALVULA_PREFIXO + valvula.id, valvula.color);
+    }
+    this.cdr.detectChanges();
   }
 
   toggleCanal2Visivel(event: CustomEvent, valvula: ValvulaView) {
