@@ -325,13 +325,13 @@ export class HomePage implements OnInit, OnDestroy {
     this.esp.pulseMotor(direcao, valvula.id, canal).subscribe({
       next: (resp) => {
         console.log(`Motor acionado: no ${valvula.id} canal ${canal} dir ${direcao}`, resp);
-        this.esp.getStatus().subscribe({
-          next: (status) => {
-            this.statusConfirmouNosAtivos = Array.isArray(status) && status.length > 0;
-            this.atualizarValvulas(status);
-          },
-          error: (err) => console.error('Erro ao atualizar status após acionar motor:', err)
-        });
+        // this.esp.getStatus().subscribe({
+        //   next: (status) => {
+        //     this.statusConfirmouNosAtivos = Array.isArray(status) && status.length > 0;
+        //     this.atualizarValvulas(status);
+        //   },
+        //   error: (err) => console.error('Erro ao atualizar status após acionar motor:', err)
+        // });
         setTimeout(resetarLoading, TEMPO_PROGRESSO_MS);
         this.cdr.detectChanges();
       },

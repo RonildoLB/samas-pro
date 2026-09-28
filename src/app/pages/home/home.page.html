@@ -54,14 +54,14 @@
 
                 @if (nodesAcordados) {
                   <div class="button-group">
-                    <button class="btn btn-success relative"
+                    <button class="btn btn-success relative btn-3d-green"
                             [disabled]="motorDesabilitado(valvula, 1)"
                             (click)="acionarMotorProgresso(valvula, 'cw', 1)">
                       <span class="btn-text">{{ valvula.loadingLigarC1 ? 'LIGANDO...' : 'LIGAR' }}</span>
                       <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC1"></div>
                     </button>
 
-                    <button class="btn btn-danger relative"
+                    <button class="btn btn-danger relative btn-3d-red"
                             [disabled]="motorDesabilitado(valvula, 1)"
                             (click)="acionarMotorProgresso(valvula, 'acw', 1)">
                       <span class="btn-text">{{ valvula.loadingDesligarC1 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>
@@ -167,14 +167,14 @@
 
               @if (nodesAcordados) {
                 <div class="button-group">
-                  <button class="btn btn-success relative"
+                  <button class="btn btn-success relative btn-3d-green"
                           [disabled]="motorDesabilitado(valvula, 2)"
                           (click)="acionarMotorProgresso(valvula, 'cw', 2)">
                     <span class="btn-text">{{ valvula.loadingLigarC2 ? 'LIGANDO...' : 'LIGAR' }}</span>
                     <div class="progress-bar" [class.active-progress]="valvula.loadingLigarC2"></div>
                   </button>
 
-                  <button class="btn btn-danger relative"
+                  <button class="btn btn-danger relative btn-3d-red"
                           [disabled]="motorDesabilitado(valvula, 2)"
                           (click)="acionarMotorProgresso(valvula, 'acw', 2)">
                     <span class="btn-text">{{ valvula.loadingDesligarC2 ? 'DESLIGANDO...' : 'DESLIGAR' }}</span>

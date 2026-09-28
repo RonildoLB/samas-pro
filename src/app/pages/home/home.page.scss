@@ -274,7 +274,6 @@ ion-toggle {
   border: none;
   color: #d93025;
   font-size: 0.8rem;
-  font-weight: 600;
   cursor: pointer;
       gap: 0.25rem;
   padding: 4px 8px;
@@ -514,4 +513,47 @@ ion-toggle {
     height: 40px;
     min-height: 40px;
   }
+}
+
+
+.btn-3d-red {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #aa2f11;
+}
+
+.btn-3d-red:hover {
+    transform: translateY(1px);
+    box-shadow: 0 5px 0 #aa2f11;
+}
+
+.btn-3d-red:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #aa2f11;
+}
+
+.btn-3d-green {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #096811;
+}
+
+.btn-3d-green:hover {
+    transform: translateY(1px);
+    box-shadow: 0 5px 0 #096811;
+}
+
+.btn-3d-green:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #096811;
 }
