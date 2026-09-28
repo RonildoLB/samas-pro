@@ -1,5 +1,5 @@
 ion-content {
-  --background: rgb(182, 192, 204);
+  --background: rgb(246, 246, 247);
 }
 
 #container {
@@ -95,7 +95,7 @@ ion-card-title {
 .card-body {
   padding: 16px;
   background-color: #fcfcfc;
-  border: 1px solid #a5a1a196;
+  border: 1px solid #a5a1a1;
   border-radius: 0.5rem;
   position: relative;
 }
@@ -190,14 +190,14 @@ ion-card-title {
 }
 
 /* Switch Funcional */
-.toggle {
-  width: 44px;
-  height: 24px;
-  border-radius: 24px;
-  position: relative;
+.ios-toggle {
+  height: 14px;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 0.3s;
+}
+
+ion-toggle {
+  --width: 40px;   /* largura do toggle */
+  --height: 20px;  /* altura do toggle */
 }
 
 .switch-on { background: #1e8e3e; }
@@ -276,7 +276,13 @@ ion-card-title {
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+      gap: 0.25rem;
   padding: 4px 8px;
+  display: flex;
+    flex-direction: column;
+    border: 1px solid;
+    border-radius: 10px;
+    align-items: center;
 }
 
 /* Grid para 2 inputs (Data e Hora) */
@@ -459,6 +465,7 @@ ion-card-title {
 }
 
 .waves {
+  opacity: 80%;
   position: absolute;
   bottom: 0;
   left: 0;

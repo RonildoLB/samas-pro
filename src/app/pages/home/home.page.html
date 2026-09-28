@@ -5,7 +5,8 @@
   }
 
   @for (valvula of valvulas; track valvula.id) {
-    <ion-card color="light">
+    <ion-card color="light" style="border: 1px solid #a5a1a1aa;"
+    [style.background]="'color-mix(in srgb, ' + valvula.color + ' 25%, transparent)'">
       <ion-card-header class="card-header" [style.background]="valvula.color">
         <ion-card-title>POSTE {{ valvula.id }}</ion-card-title>
         <ion-icon [icon]="settingsSharpIcon" size="small" (click)="alternarConfiguracao(valvula)"></ion-icon>
@@ -43,7 +44,11 @@
                     <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
                       alt="Status Canal 1"
                       class="gif-irrigacao-sm">
-                    <div style="text-align: left;">A válvula {{ valvula.id }}-A está LIGADA</div>
+                    <div style="text-align: left;">A válvula {{ valvula.id }}-A está 
+                      <span [style.color]="valvula.estadoCanal1 ? 'green' : '#dc3545'">
+                        {{ valvula.estadoCanal1 ? 'LIGADA' : 'DESLIGADA' }}
+                      </span>  
+                    </div>
                   </ion-card-subtitle>
                 </div>
 
@@ -100,17 +105,20 @@
                               @if (par.idLigar !== undefined) {
                                 <div class="time-row">
                                   <span class="badge badge-green">LIGA</span>
-                                  <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
+                                  <strong>{{ par.hrLigar?.toString()?.padStart(2, '0') }}:{{ par.minLigar?.toString()?.padStart(2, '0') }}</strong>
                                 </div>
                               }
                               @if (par.idDesligar !== undefined) {
                                 <div class="time-row">
                                   <span class="badge badge-red">DESLIGA</span>
-                                  <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
+                                  <strong>{{ par.hrDesligar?.toString()?.padStart(2, '0') }}:{{ par.minDesligar?.toString()?.padStart(2, '0') }}</strong>
                                 </div>
                               }
                             </div>
-                            <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">Excluir</button>
+                            <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">
+                              <ion-icon [icon]="trash" size="small"></ion-icon>
+                              Excluir
+                            </button>
                           </li>
                         }
                       </ul>
@@ -119,18 +127,20 @@
                 </div>
               </div>
 
-              <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                  <defs>
-                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                  </defs>
-                  <g class="parallax">
-                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
-                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
-                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
-                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
-                  </g>
-                </svg>
+              @if (valvula.estadoCanal1) {
+                <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                  viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                    <defs>
+                      <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                    </defs>
+                    <g class="parallax">
+                      <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
+                      <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
+                      <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
+                      <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
+                    </g>
+                  </svg>
+              }
             </div>
           </div>
 
@@ -144,10 +154,14 @@
                     Válvula B
                   </ion-card-title>
                 <ion-card-subtitle style="display: flex; align-items: end; gap: 8px;">   
-                  <img [src]="valvula.estadoCanal1 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
-                    alt="Status Canal 1"
+                  <img [src]="valvula.estadoCanal2 ? 'assets/sprinkleron.gif' : 'assets/sprinkleroff.gif'"
+                    alt="Status Canal 2"
                     class="gif-irrigacao-sm">
-                  <div style="text-align: left;">A válvula {{ valvula.id }}-B está LIGADA</div>
+                  <div style="text-align: left;">A válvula {{ valvula.id }}-B está 
+                    <span [style.color]="valvula.estadoCanal2 ? 'green' : '#dc3545'">
+                      {{ valvula.estadoCanal2 ? 'LIGADA' : 'DESLIGADA' }}
+                    </span>  
+                  </div>
                 </ion-card-subtitle>
               </div>
 
@@ -241,16 +255,17 @@
                             @if (par.idLigar !== undefined) {
                               <div class="time-row">
                                 <span class="badge badge-green">LIGA</span>
-                                <strong>{{ par.hrLigar }}:{{ par.minLigar }}</strong>
+                                <strong>{{ par.hrLigar?.toString()?.padStart(2, '0') }}:{{ par.minLigar?.toString()?.padStart(2, '0') }}</strong>
                               </div>
                             }
                             @if (par.idDesligar !== undefined) {
                               <div class="time-row">
                                 <span class="badge badge-red">DESLIGA</span>
-                                <strong>{{ par.hrDesligar }}:{{ par.minDesligar }}</strong>
+                                <strong>{{ par.hrDesligar?.toString()?.padStart(2, '0') }}:{{ par.minDesligar?.toString()?.padStart(2, '0') }}</strong>
                               </div>
                             }
                           </div>
+                          <ion-icon [icon]="trash" size="small"></ion-icon>
                           <button class="btn-icon" (click)="deletarDupla(valvula, par, 2)">Excluir</button>
                         </li>
                       }
@@ -261,18 +276,20 @@
 
             
           </div>
-          <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-              <defs>
-                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-              </defs>
-              <g class="parallax">
-                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
-                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
-                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
-                <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
-              </g>
-            </svg>
+          @if (valvula.estadoCanal2) {
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                  <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g class="parallax">
+                  <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
+                  <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
+                  <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
+                  <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
+                </g>
+              </svg>
+          }
           </div>
           </div>
         }

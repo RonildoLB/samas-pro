@@ -8,7 +8,7 @@ import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.servic
 import { FormsModule } from '@angular/forms';
 import { timer, Subscription, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
-import { settingsOutline, close } from 'ionicons/icons';
+import { settingsOutline, close, trashOutline } from 'ionicons/icons';
 import { NgxColorsComponent, NgxColorsTriggerDirective } from 'ngx-colors';
 
 const CANAL2_VISIVEL_PREFIXO = 'samas_canal2_visivel_no_';
@@ -92,6 +92,7 @@ interface ValvulaView {
 
 export class HomePage implements OnInit, OnDestroy {
   // VARIÁVEIS
+  trash = trashOutline;
   settingsSharpIcon = settingsOutline;
   addIcon = close;
   connected = false;
@@ -182,8 +183,8 @@ export class HomePage implements OnInit, OnDestroy {
       return {
         id: no.ID_valve,
         nome: no.name_valve,
-        estadoCanal1: !!no.estado_canal_1,
-        estadoCanal2: !!no.estado_canal_2,
+        estadoCanal1: no.estado_canal_1 === 1,
+        estadoCanal2: no.estado_canal_2 === 1,
         clockAtualizado: no.clock_updated,
         clock: no.clock,
         canal2Visivel: anterior ? anterior.canal2Visivel : this.lerCanal2Visivel(no.ID_valve),
@@ -324,6 +325,13 @@ export class HomePage implements OnInit, OnDestroy {
     this.esp.pulseMotor(direcao, valvula.id, canal).subscribe({
       next: (resp) => {
         console.log(`Motor acionado: no ${valvula.id} canal ${canal} dir ${direcao}`, resp);
+        this.esp.getStatus().subscribe({
+          next: (status) => {
+            this.statusConfirmouNosAtivos = Array.isArray(status) && status.length > 0;
+            this.atualizarValvulas(status);
+          },
+          error: (err) => console.error('Erro ao atualizar status após acionar motor:', err)
+        });
         setTimeout(resetarLoading, TEMPO_PROGRESSO_MS);
         this.cdr.detectChanges();
       },
