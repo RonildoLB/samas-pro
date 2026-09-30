@@ -1,6 +1,8 @@
 import { IonContent, IonProgressBar, IonToggle, IonIcon, 
   IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
-  IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, IonModal
+  IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, 
+  IonModal, RefresherCustomEvent, IonRefresherContent,
+  IonRefresher,
 } from '@ionic/angular';
 import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
@@ -84,10 +86,11 @@ interface ValvulaView {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   imports: [IonContent, IonButton, FormsModule,
-    IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
-    IonProgressBar, IonToggle, IonIcon, NgxColorsComponent,
-    NgxColorsTriggerDirective, IonDatetime, IonDatetimeButton,
-    IonModal, IonAccordion, IonAccordionGroup, IonItem, IonLabel
+    IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
+    IonCardTitle, IonProgressBar, IonToggle, IonIcon, 
+    NgxColorsComponent, NgxColorsTriggerDirective, IonDatetime, 
+    IonDatetimeButton, IonModal, IonAccordion, IonAccordionGroup,
+    IonItem, IonLabel, IonRefresherContent, IonRefresher
   ],
 })
 
@@ -122,6 +125,13 @@ export class HomePage implements OnInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  handleRefresh(event: RefresherCustomEvent) {
+    setTimeout(() => {
+      // Any calls to load data go here
+      event.target.complete();
+    }, 2000);
   }
 
   get nodesAcordados(): boolean {
