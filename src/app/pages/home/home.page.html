@@ -34,6 +34,7 @@
         
         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
           <div class="card" style="width: 100%; position: relative;">
+          <div class="card" style="width: 100%; position: relative;">
             <div class="card-body" style="text-align: center; color: #5f6368;">
               <div class="channel-block">
                 <div class="channel-title" style="flex-direction: column;">
@@ -92,9 +93,12 @@
               }
             </div>
 
-            <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
+            
+          </div>
+
+          <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
                   <ion-accordion value="first" style="margin: 0;">
-                    <ion-item slot="header">
+                    <ion-item slot="header" color="light">
                       <img src="/assets/time-management.png" alt="Agendamento">
                       <ion-label class="schedule-title" style="color: #5a5a5c;">&nbsp;&nbsp;Agendamentos</ion-label>
                     </ion-item>
@@ -150,11 +154,12 @@
                     </div>
                   </ion-accordion>
                 </ion-accordion-group>
-          </div>
+                </div>
 
           <!-- CANAL 2 (condicional) -->
           @if (valvula.canal2Visivel) {
             <div class="card" style="width: 100%;">
+              <div class="card" style="width: 100%;">
             <div class="card-body" style="text-align: center; color: #5f6368;">
             <div class="channel-block channel-block-2">
               <div class="channel-title" style="flex-direction: column;">
@@ -211,9 +216,12 @@
           }
           </div>
 
+          
+          </div>
+
           <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
                   <ion-accordion value="first" style="margin: 0;">
-                    <ion-item slot="header">
+                    <ion-item slot="header" color="light">
                       <img src="/assets/time-management.png" alt="Agendamento">
                       <ion-label class="schedule-title" style="color: #5a5a5c;">&nbsp;&nbsp;Agendamentos</ion-label>
                     </ion-item>
@@ -305,9 +313,11 @@
                     </div>
                   </ion-accordion>
                 </ion-accordion-group>
-          </div>
+              </div>
         }
         </div>
+
+        
       </ion-card-content>
     </ion-card>
   }
