@@ -33,7 +33,7 @@
         }
         
         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-          <div class="card" style="width: 100%;">
+          <div class="card" style="width: 100%; position: relative;">
             <div class="card-body" style="text-align: center; color: #5f6368;">
               <div class="channel-block">
                 <div class="channel-title" style="flex-direction: column;">
@@ -72,59 +72,8 @@
                   <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
                 }
 
-                <div class="schedule-section">
-                  <div class="schedule-title">
-                    <img src="/assets/time-management.png" alt="Agendamento">
-                    Agendamento - Canal 1
-                  </div>
-                  <div class="schedule-controls">
-                    <div class="time-input">
-                      <label>Ligar às:</label>
-                      <input type="time" [(ngModel)]="valvula.novoHoraLigarC1">
-                    </div>
-                    <div class="time-input">
-                      <label>Desligar às:</label>
-                      <input type="time" [(ngModel)]="valvula.novoHoraDesligarC1">
-                    </div>
 
-                    <!-- <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
-                      <span class="material-icons">+</span>
-                    </button> -->
-
-                    <ion-button size="default" shape="round" (click)="adicionarAgendamento(valvula, 1)">
-                      <ion-icon [icon]="addIcon" slot="icon-only" size="medium" style="transform: rotate(45deg);"></ion-icon>
-                    </ion-button>
-                  </div>
-
-                  @if (valvula.agendamentosCanal1.length > 0) {
-                    <div class="schedule-list">
-                      <ul>
-                        @for (par of valvula.agendamentosCanal1; track $index) {
-                          <li class="pair-card">
-                            <div class="pair-info">
-                              @if (par.idLigar !== undefined) {
-                                <div class="time-row">
-                                  <span class="badge badge-green">LIGA</span>
-                                  <strong>{{ par.hrLigar?.toString()?.padStart(2, '0') }}:{{ par.minLigar?.toString()?.padStart(2, '0') }}</strong>
-                                </div>
-                              }
-                              @if (par.idDesligar !== undefined) {
-                                <div class="time-row">
-                                  <span class="badge badge-red">DESLIGA</span>
-                                  <strong>{{ par.hrDesligar?.toString()?.padStart(2, '0') }}:{{ par.minDesligar?.toString()?.padStart(2, '0') }}</strong>
-                                </div>
-                              }
-                            </div>
-                            <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">
-                              <ion-icon [icon]="trash" size="small"></ion-icon>
-                              Excluir
-                            </button>
-                          </li>
-                        }
-                      </ul>
-                    </div>
-                  }
-                </div>
+                
               </div>
 
               @if (valvula.estadoCanal1) {
@@ -142,6 +91,65 @@
                   </svg>
               }
             </div>
+
+            <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
+                  <ion-accordion value="first" style="margin: 0;">
+                    <ion-item slot="header">
+                      <img src="/assets/time-management.png" alt="Agendamento">
+                      <ion-label class="schedule-title" style="color: #5a5a5c;">&nbsp;&nbsp;Agendamentos</ion-label>
+                    </ion-item>
+                    
+                    <div class="ion-padding" slot="content">
+                      <div class="schedule-controls">
+                        <div class="time-input">
+                          <label>Ligar às:</label>
+                          <input type="time" [(ngModel)]="valvula.novoHoraLigarC1">
+                        </div>
+                        <div class="time-input">
+                          <label>Desligar às:</label>
+                          <input type="time" [(ngModel)]="valvula.novoHoraDesligarC1">
+                        </div>
+
+                        <!-- <button class="btn-add" (click)="adicionarAgendamento(valvula, 1)">
+                          <span class="material-icons">+</span>
+                        </button> -->
+
+                        <ion-button size="default" shape="round" (click)="adicionarAgendamento(valvula, 1)">
+                          <ion-icon [icon]="addIcon" slot="icon-only" size="medium" style="transform: rotate(45deg);"></ion-icon>
+                        </ion-button>
+                      </div>
+
+                      @if (valvula.agendamentosCanal1.length > 0) {
+                        <div class="schedule-list">
+                          <ul>
+                            @for (par of valvula.agendamentosCanal1; track $index) {
+                              <li class="pair-card">
+                                <div class="pair-info">
+                                  @if (par.idLigar !== undefined) {
+                                    <div class="time-row">
+                                      <span class="badge badge-green">LIGA</span>
+                                      <strong>{{ par.hrLigar?.toString()?.padStart(2, '0') }}:{{ par.minLigar?.toString()?.padStart(2, '0') }}</strong>
+                                    </div>
+                                  }
+                                  @if (par.idDesligar !== undefined) {
+                                    <div class="time-row">
+                                      <span class="badge badge-red">DESLIGA</span>
+                                      <strong>{{ par.hrDesligar?.toString()?.padStart(2, '0') }}:{{ par.minDesligar?.toString()?.padStart(2, '0') }}</strong>
+                                    </div>
+                                  }
+                                </div>
+                                <button class="btn-icon" (click)="deletarDupla(valvula, par, 1)">
+                                  <ion-icon [icon]="trash" size="small"></ion-icon>
+                                  Excluir
+                                </button>
+                              </li>
+                            }
+                          </ul>
+                        </div>
+                      }
+                    </div>
+                  </ion-accordion>
+                </ion-accordion-group>
           </div>
 
           <!-- CANAL 2 (condicional) -->
@@ -185,11 +193,33 @@
                 <div class="wait-message">Espere até o minuto {{ proximoHorarioDisponivel }}</div>
               }
 
-              <div class="schedule-section">
-                <div class="schedule-title">
-                  <img src="/assets/time-management.png" alt="Agendamento">
-                  Agendamento - Canal 2
-                </div>
+            
+          </div>
+          @if (valvula.estadoCanal2) {
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                  <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g class="parallax">
+                  <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
+                  <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
+                  <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
+                  <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
+                </g>
+              </svg>
+          }
+          </div>
+
+          <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
+                  <ion-accordion value="first" style="margin: 0;">
+                    <ion-item slot="header">
+                      <img src="/assets/time-management.png" alt="Agendamento">
+                      <ion-label class="schedule-title" style="color: #5a5a5c;">&nbsp;&nbsp;Agendamentos</ion-label>
+                    </ion-item>
+                    
+                    <div class="ion-padding" slot="content">
+                      
                 <div class="schedule-controls">
                   <div class="time-input">
                     <label>Ligar às:</label>
@@ -272,25 +302,9 @@
                     </ul>
                   </div>
                 }
-            </div>
-
-            
-          </div>
-          @if (valvula.estadoCanal2) {
-            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                  <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g class="parallax">
-                  <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(55,55,255,0.7)" />
-                  <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(5,55,255,0.5)" />
-                  <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(5,75,255,0.3)" />
-                  <use xlink:href="#gentle-wave" x="48" y="7" fill="#06e" />
-                </g>
-              </svg>
-          }
-          </div>
+                    </div>
+                  </ion-accordion>
+                </ion-accordion-group>
           </div>
         }
         </div>

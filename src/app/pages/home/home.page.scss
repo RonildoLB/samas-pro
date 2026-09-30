@@ -138,7 +138,6 @@ ion-card-title {
 .schedule-section {
   border-top: 1px solid #f1f3f4;
   margin-top: 1rem;
-  padding-top: 0.75rem;
 }
 
 .schedule-title {
@@ -472,7 +471,6 @@ ion-toggle {
   height: 15vh;
   min-height: 60px;
   max-height: 100px;
-  margin-bottom: -7px;
   z-index: 1; 
   pointer-events: none; /* Impede que as ondas bloqueiem os cliques nos botões */
 }

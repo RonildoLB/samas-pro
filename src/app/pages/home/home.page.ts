@@ -2,6 +2,7 @@ import { IonContent, IonProgressBar, IonToggle, IonIcon,
   IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
   IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, IonModal
 } from '@ionic/angular';
+import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.service';
@@ -86,7 +87,7 @@ interface ValvulaView {
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
     IonProgressBar, IonToggle, IonIcon, NgxColorsComponent,
     NgxColorsTriggerDirective, IonDatetime, IonDatetimeButton,
-    IonModal
+    IonModal, IonAccordion, IonAccordionGroup, IonItem, IonLabel
   ],
 })
 
