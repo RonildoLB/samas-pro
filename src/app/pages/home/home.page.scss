@@ -76,6 +76,7 @@ ion-content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   background-color: green; font-size: small;
 }
 
@@ -334,7 +335,7 @@ ion-toggle {
 
 /* Estado desabilitado dos botões de Motor */
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.8;
   cursor: not-allowed;
   background-color: #9aa0a6 !important; /* Força cor cinza quando inativo */
 }
@@ -520,7 +521,8 @@ ion-toggle {
 
 
 .btn-3d-red {
-    padding: 14px 32px;
+    padding-bottom: 16px;
+    padding-top: 16px;
     border: none;
     border-radius: 10px;
     color: white;
@@ -531,8 +533,8 @@ ion-toggle {
 }
 
 .btn-3d-red:hover {
-    transform: translateY(1px);
-    box-shadow: 0 5px 0 #aa2f11;
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 #aa2f11;
 }
 
 .btn-3d-red:active {
@@ -541,7 +543,8 @@ ion-toggle {
 }
 
 .btn-3d-green {
-    padding: 14px 32px;
+    padding-bottom: 16px;
+    padding-top: 16px;
     border: none;
     border-radius: 10px;
     color: white;
@@ -552,8 +555,8 @@ ion-toggle {
 }
 
 .btn-3d-green:hover {
-    transform: translateY(1px);
-    box-shadow: 0 5px 0 #096811;
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 #096811;
 }
 
 .btn-3d-green:active {

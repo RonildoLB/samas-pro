@@ -360,9 +360,14 @@ export class HomePage implements OnInit, OnDestroy {
 
   motorDesabilitado(valvula: ValvulaView, canal: 1 | 2): boolean {
     if (!this.connected || !this.nodesAcordados) return true;
-    return canal === 1
-      ? (valvula.loadingLigarC1 || valvula.loadingDesligarC1)
-      : (valvula.loadingLigarC2 || valvula.loadingDesligarC2);
+    const motorDoCanalAtivo = canal === 1
+      ? valvula.loadingLigarC1 || valvula.loadingDesligarC1
+      : valvula.loadingLigarC2 || valvula.loadingDesligarC2;
+    const motorDoOutroCanalAtivo = canal === 1
+      ? valvula.loadingLigarC2 || valvula.loadingDesligarC2
+      : valvula.loadingLigarC1 || valvula.loadingDesligarC1;
+
+    return motorDoCanalAtivo || motorDoOutroCanalAtivo;
   }
 
   adicionarAgendamento(valvula: ValvulaView, canal: 1 | 2) {

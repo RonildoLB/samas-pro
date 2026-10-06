@@ -11,8 +11,8 @@
   @for (valvula of valvulas; track valvula.id) {
     <ion-card color="light" style="border: 1px solid #a5a1a1aa;"
     [style.background]="'color-mix(in srgb, ' + valvula.color + ' 25%, transparent)'">
-      <ion-card-header class="card-header" [style.background]="valvula.color">
-        <ion-card-title>POSTE {{ valvula.id }}</ion-card-title>
+      <ion-card-header class="card-header" [style.background]="valvula.color" translucent="true">
+        <ion-card-title style="font-size: 18px;">POSTE {{ valvula.id }}</ion-card-title>
         <ion-icon [icon]="settingsSharpIcon" size="small" (click)="alternarConfiguracao(valvula)"></ion-icon>
         <!--<span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>-->
       </ion-card-header>
@@ -100,7 +100,7 @@
             
           </div>
 
-          <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
+          <ion-accordion-group expand="inset" [animated]="false" style="margin: 0; margin-bottom: 0;">
                   <ion-accordion value="first" style="margin: 0;">
                     <ion-item slot="header" color="light">
                       <img src="/assets/time-management.png" alt="Agendamento">
@@ -225,7 +225,7 @@
           
           </div>
 
-          <ion-accordion-group expand="inset" style="margin: 0; margin-bottom: 0;">
+          <ion-accordion-group expand="inset" [animated]="false" style="margin: 0; margin-bottom: 0;">
                   <ion-accordion value="first" style="margin: 0;">
                     <ion-item slot="header" color="light">
                       <img src="/assets/time-management.png" alt="Agendamento">
