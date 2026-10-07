@@ -13,6 +13,9 @@
     [style.background]="'color-mix(in srgb, ' + valvula.color + ' 25%, transparent)'">
       <ion-card-header class="card-header" [style.background]="valvula.color" translucent="true">
         <ion-card-title style="font-size: 18px;">POSTE {{ valvula.id }}</ion-card-title>
+        <span [style.color]="'white'">
+            {{ valvula.clockAtualizado ? valvula.clock : 'Não atualizado' }}
+        </span>
         <ion-icon [icon]="settingsSharpIcon" size="small" (click)="alternarConfiguracao(valvula)"></ion-icon>
         <!--<span style="font-size: 0.75rem; font-weight: 400; opacity: 0.9;">ID {{ valvula.id }}</span>-->
       </ion-card-header>
@@ -163,7 +166,8 @@
                 </div>
 
           <!-- CANAL 2 (condicional) -->
-          @if (valvula.canal2Visivel) {
+           <!-- @if (valvula.canal2Visivel) { -->
+          @if (true) {
             <div class="card" style="width: 100%; height: fit-content;">
               <div class="card" style="width: 100%;">
             <div class="card-body" style="text-align: center; color: #5f6368;">
