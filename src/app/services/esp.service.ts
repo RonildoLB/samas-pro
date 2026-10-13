@@ -57,7 +57,7 @@ export class EspService {
   }
 
   private get baseUrl(): string {
-    return `https://${this.getHost()}`;
+    return `http://${this.getHost()}`;
   }
 
   setTime(dia: number, mes: number, ano: number, hora: number, min: number, seg: number) {
