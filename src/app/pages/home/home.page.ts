@@ -1,26 +1,33 @@
-import { IonContent, IonProgressBar, IonToggle, IonIcon, 
+import { IonAccordion, IonAccordionGroup, IonItem, IonLabel,
+  IonContent, IonProgressBar, IonIcon, 
   IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
   IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, 
   IonModal, RefresherCustomEvent, IonRefresherContent,
-  IonRefresher,
+  IonRefresher, IonList, ToastController
 } from '@ionic/angular';
-import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/angular';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, NgZone, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.service';
 import { FormsModule } from '@angular/forms';
-import { timer, Subscription, of } from 'rxjs';
+import { timer, Subscription, of, timeout, TimeoutError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { settingsOutline, close, trashOutline } from 'ionicons/icons';
 import { NgxColorsComponent, NgxColorsTriggerDirective } from 'ngx-colors';
+import { SelectModule } from 'primeng/select';
 
 const CANAL2_VISIVEL_PREFIXO = 'samas_canal2_visivel_no_';
+const QUANTIDADE_VALVULAS_PREFIXO = 'samas_valvulas_quantidade_no_';
+const MAX_VALVULAS = 4;
 const COR_VALVULA_PREFIXO = 'samas_cor_valvula_no_';
 const TEMPO_PROGRESSO_MS = 5000;
 const INTERVALO_STATUS_MS = 5000;
+const INTERVALO_RELOGIO_MS = 30_000;
 
 // Chave única por válvula+canal, usada para indexar os mapas de estado otimista.
-function chaveCanal(idValvula: number, canal: 1 | 2): string {
+type Canal = 1 | 2 | 3 | 4;
+const CANAIS: Canal[] = [1, 2, 3, 4];
+
+function chaveCanal(idValvula: number, canal: Canal): string {
   return `${idValvula}:${canal}`;
 }
 
@@ -55,30 +62,27 @@ interface AgendamentoPar {
   removendoPendente?: boolean;
 }
 
+interface CanalView {
+  canal: Canal;
+  estado: boolean;
+  agendamentos: AgendamentoPar[];
+  loadingLigar: boolean;
+  loadingDesligar: boolean;
+  novoHoraLigar: string;
+  novoHoraDesligar: string;
+}
+
 interface ValvulaView {
   id: number;
   nome: string;
-  estadoCanal1: boolean;
-  estadoCanal2: boolean;
   clockAtualizado: boolean;
   clock: string;
-  canal2Visivel: boolean;
-
-  agendamentosCanal1: AgendamentoPar[];
-  agendamentosCanal2: AgendamentoPar[];
-
-  loadingLigarC1: boolean;
-  loadingDesligarC1: boolean;
-  loadingLigarC2: boolean;
-  loadingDesligarC2: boolean;
-
-  novoHoraLigarC1: string;
-  novoHoraDesligarC1: string;
-  novoHoraLigarC2: string;
-  novoHoraDesligarC2: string;
+  quantidadeValvulas: number;
+  canais: CanalView[];
   color: string;
   showConfig: boolean;
 }
+
 /*-------------------------------------*/
 
 @Component({
@@ -87,10 +91,11 @@ interface ValvulaView {
   styleUrls: ['home.page.scss'],
   imports: [IonContent, IonButton, FormsModule,
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
-    IonCardTitle, IonProgressBar, IonToggle, IonIcon, 
+    IonCardTitle, IonProgressBar, IonIcon, 
     NgxColorsComponent, NgxColorsTriggerDirective, IonDatetime, 
     IonDatetimeButton, IonModal, IonAccordion, IonAccordionGroup,
-    IonItem, IonLabel, IonRefresherContent, IonRefresher
+    IonItem, IonLabel, IonRefresherContent, IonRefresher,
+    IonList, SelectModule
   ],
 })
 
@@ -109,6 +114,13 @@ export class HomePage implements OnInit, OnDestroy {
   hostEsp: string = 'esp.local';
   mostrarRelogioCard: boolean = false;
   proximoHorarioDisponivel: string = proximoMultiploDe5();
+  agoraLocal: number = Date.now();
+  readonly opcoesQuantidadeValvulas = [
+    { label: '1 Válvula', value: '1' },
+    { label: '2 Válvulas', value: '2' },
+    { label: '3 Válvulas', value: '3' },
+    { label: '4 Válvulas', value: '4' },
+  ];
   /*----------------------------*/
 
   private statusSubscription?: Subscription;
@@ -118,10 +130,13 @@ export class HomePage implements OnInit, OnDestroy {
   private statusConfirmouNosAtivos: boolean = false;
   private adicionadosPendentes = new Map<string, AgendamentoPar[]>();
   private removidosPendentes = new Map<string, Set<number>>();
+  private quantidadeValvulasPorNo = new Map<number, number>();
 
   constructor(
     private esp: EspService,
     private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private toastController: ToastController,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -167,14 +182,14 @@ export class HomePage implements OnInit, OnDestroy {
         this.atualizarValvulas(resp);
       });
 
-    // Recalcula a cada segundo: o rótulo "Espere até HH:MM" (caso o minuto
-    // vire) e a janela teórica de despertar - liga E desliga junto com o
-    // minuto múltiplo de 5, sem esperar o próximo ciclo do /status (que só
-    // roda a cada 5s).
-    this.relogioSubscription = timer(0, 1000).subscribe(() => {
-      this.proximoHorarioDisponivel = proximoMultiploDe5();
-      this.dentroDaJanelaRelogio = dentroDoMinutoMultiploDe5();
-      this.cdr.detectChanges();
+    // Atualiza o relógio local, o LED e a janela teórica de despertar a cada 30s.
+    this.relogioSubscription = timer(0, INTERVALO_RELOGIO_MS).subscribe(() => {
+      this.ngZone.run(() => {
+        this.agoraLocal = Date.now();
+        this.proximoHorarioDisponivel = proximoMultiploDe5();
+        this.dentroDaJanelaRelogio = dentroDoMinutoMultiploDe5();
+        this.cdr.detectChanges();
+      });
     });
   }
 
@@ -188,39 +203,48 @@ export class HomePage implements OnInit, OnDestroy {
 
     this.valvulas = (lista || []).map((no) => {
       const anterior = this.valvulas.find(v => v.id === no.ID_valve);
-
-      const { canal1, canal2 } = this.separarPorCanal(no.schedulings);
+      const quantidadeValvulas = anterior?.quantidadeValvulas
+        ?? this.lerQuantidadeValvulas(no.ID_valve);
+      const estados = [
+        no.estado_canal_1,
+        no.estado_canal_2,
+        no.estado_canal_3,
+        no.estado_canal_4,
+      ];
+      const canais: CanalView[] = CANAIS.map((canal, i) => {
+        const canalAnterior = anterior?.canais.find(c => c.canal === canal);
+        const agendamentos = (no.schedulings || []).filter(s => s.canal === canal);
+        return {
+          canal,
+          estado: estados[i] === 1,
+          agendamentos: this.reconciliarComPendentes(
+            no.ID_valve,
+            canal,
+            this.agruparEmDuplas(agendamentos)
+          ),
+          loadingLigar: canalAnterior?.loadingLigar ?? false,
+          loadingDesligar: canalAnterior?.loadingDesligar ?? false,
+          novoHoraLigar: canalAnterior?.novoHoraLigar ?? '',
+          novoHoraDesligar: canalAnterior?.novoHoraDesligar ?? '',
+        };
+      });
 
       return {
         id: no.ID_valve,
         nome: no.name_valve,
-        estadoCanal1: no.estado_canal_1 === 1,
-        estadoCanal2: no.estado_canal_2 === 1,
         clockAtualizado: no.clock_updated,
         clock: no.clock,
-        canal2Visivel: anterior ? anterior.canal2Visivel : this.lerCanal2Visivel(no.ID_valve),
+        quantidadeValvulas,
+        canais,
         color: anterior?.color ?? this.lerCorValvula(no.ID_valve),
         showConfig: anterior?.showConfig ?? false,
-
-        agendamentosCanal1: this.reconciliarComPendentes(no.ID_valve, 1, this.agruparEmDuplas(canal1)),
-        agendamentosCanal2: this.reconciliarComPendentes(no.ID_valve, 2, this.agruparEmDuplas(canal2)),
-
-        loadingLigarC1: anterior?.loadingLigarC1 ?? false,
-        loadingDesligarC1: anterior?.loadingDesligarC1 ?? false,
-        loadingLigarC2: anterior?.loadingLigarC2 ?? false,
-        loadingDesligarC2: anterior?.loadingDesligarC2 ?? false,
-
-        novoHoraLigarC1: anterior?.novoHoraLigarC1 ?? '',
-        novoHoraDesligarC1: anterior?.novoHoraDesligarC1 ?? '',
-        novoHoraLigarC2: anterior?.novoHoraLigarC2 ?? '',
-        novoHoraDesligarC2: anterior?.novoHoraDesligarC2 ?? '',
       };
     });
 
     this.cdr.detectChanges();
   }
 
-  private reconciliarComPendentes(idValvula: number, canal: 1 | 2, paresReais: AgendamentoPar[]): AgendamentoPar[] {
+  private reconciliarComPendentes(idValvula: number, canal: Canal, paresReais: AgendamentoPar[]): AgendamentoPar[] {
     const chave = chaveCanal(idValvula, canal);
 
     // Adição: descarta provisórios cujo id já apareceu na lista real
@@ -258,12 +282,6 @@ export class HomePage implements OnInit, OnDestroy {
     return [...paresComMarcaRemocao, ...provisoriosAtuais];
   }
 
-  private separarPorCanal(schedulings: SchedulingRaw[]): { canal1: SchedulingRaw[]; canal2: SchedulingRaw[] } {
-    const canal1 = (schedulings || []).filter(s => s.canal === 1);
-    const canal2 = (schedulings || []).filter(s => s.canal === 2);
-    return { canal1, canal2 };
-  }
-
   private agruparEmDuplas(lista: SchedulingRaw[]): AgendamentoPar[] {
     const ligar = lista.filter(s => s.dir === 1).sort((a, b) => a.id - b.id);
     const desligar = lista.filter(s => s.dir === 2).sort((a, b) => a.id - b.id);
@@ -285,10 +303,43 @@ export class HomePage implements OnInit, OnDestroy {
     return duplas;
   }
 
-  private lerCanal2Visivel(idNo: number): boolean {
-    if (!this.isBrowser) return true;
-    const valor = localStorage.getItem(CANAL2_VISIVEL_PREFIXO + idNo);
-    return valor === null ? true : valor === '1';
+  private lerQuantidadeValvulas(idNo: number): number {
+    const emMemoria = this.quantidadeValvulasPorNo.get(idNo);
+    if (emMemoria !== undefined) return emMemoria;
+    if (!this.isBrowser) return 2;
+
+    const salvo = localStorage.getItem(QUANTIDADE_VALVULAS_PREFIXO + idNo);
+    if (salvo !== null) {
+      const quantidade = this.normalizarQuantidade(salvo);
+      if (quantidade !== undefined) {
+        this.quantidadeValvulasPorNo.set(idNo, quantidade);
+        return quantidade;
+      }
+    }
+
+    const legado = localStorage.getItem(CANAL2_VISIVEL_PREFIXO + idNo);
+    const quantidade = legado === '0' ? 1 : 2;
+    if (legado !== null) {
+      localStorage.setItem(QUANTIDADE_VALVULAS_PREFIXO + idNo, String(quantidade));
+      localStorage.removeItem(CANAL2_VISIVEL_PREFIXO + idNo);
+    }
+    this.quantidadeValvulasPorNo.set(idNo, quantidade);
+    return quantidade;
+  }
+
+  private normalizarQuantidade(valor: unknown): number | undefined {
+    const quantidade = Number(valor);
+    return Number.isInteger(quantidade) && quantidade >= 1 && quantidade <= MAX_VALVULAS
+      ? quantidade
+      : undefined;
+  }
+
+  letra(canal: number): string {
+    return ['A', 'B', 'C', 'D'][canal - 1] ?? canal.toString();
+  }
+
+  canaisVisiveis(valvula: ValvulaView): CanalView[] {
+    return valvula.canais.slice(0, valvula.quantidadeValvulas);
   }
 
   private lerCorValvula(idNo: number): string {
@@ -300,6 +351,34 @@ export class HomePage implements OnInit, OnDestroy {
     valvula.showConfig = !valvula.showConfig;
   }
 
+  classeLedClock(
+    valvula: Pick<ValvulaView, 'clockAtualizado' | 'clock'>,
+    agora: number = Date.now()
+  ): 'led-green' | 'led-yellow' | 'led-red' {
+    if (!valvula.clockAtualizado) return 'led-red';
+
+    const partes = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(valvula.clock);
+    if (!partes) return 'led-red';
+
+    const [, dia, mes, ano, hora, minuto, segundo] = partes.map(Number);
+    const horario = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+    if (
+      horario.getFullYear() !== ano ||
+      horario.getMonth() !== mes - 1 ||
+      horario.getDate() !== dia ||
+      horario.getHours() !== hora ||
+      horario.getMinutes() !== minuto ||
+      horario.getSeconds() !== segundo
+    ) {
+      return 'led-red';
+    }
+
+    const diferencaMinutos = Math.abs(agora - horario.getTime()) / 60_000;
+    if (diferencaMinutos <= 5) return 'led-green';
+    if (diferencaMinutos <= 15) return 'led-yellow';
+    return 'led-red';
+  }
+
   salvarCorValvula(cor: string, valvula: ValvulaView) {
     valvula.color = cor || 'green';
     if (this.isBrowser) {
@@ -308,71 +387,148 @@ export class HomePage implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  toggleCanal2Visivel(event: CustomEvent, valvula: ValvulaView) {
-  // Atualiza o estado da válvula com o valor vindo do toggle (true ou false)
-  valvula.canal2Visivel = event.detail.checked;
+  alterarQuantidadeValvulas(valor: string, valvula: ValvulaView) {
+    const quantidade = this.normalizarQuantidade(valor);
+    if (quantidade === undefined || quantidade === valvula.quantidadeValvulas) return;
 
-  if (this.isBrowser) {
-    localStorage.setItem(
-      CANAL2_VISIVEL_PREFIXO + valvula.id,
-      valvula.canal2Visivel ? '1' : '0'
-    );
+    valvula.quantidadeValvulas = quantidade;
+    this.quantidadeValvulasPorNo.set(valvula.id, quantidade);
+    if (this.isBrowser) {
+      localStorage.setItem(QUANTIDADE_VALVULAS_PREFIXO + valvula.id, String(quantidade));
+    }
+    this.cdr.detectChanges();
   }
-}
 
-  acionarMotorProgresso(valvula: ValvulaView, direcao: 'cw' | 'acw', canal: 1 | 2) {
-    const loadingKey = this.chaveLoading(direcao, canal);
-    if (valvula[loadingKey]) return; // Trava de segurança
+  acionarMotorProgresso(valvula: ValvulaView, direcao: 'cw' | 'acw', canal: Canal) {
+    const canalView = valvula.canais[canal - 1];
+    if (this.motorDesabilitado(valvula)) return;
 
-    valvula[loadingKey] = true;
+    const loadingKey = direcao === 'cw' ? 'loadingLigar' : 'loadingDesligar';
+    canalView[loadingKey] = true;
+    this.cdr.detectChanges();
     const idValvula = valvula.id;
 
     const resetarLoading = () => {
       const atual = this.valvulas.find(v => v.id === idValvula);
-      if (atual) atual[loadingKey] = false;
+      if (atual) atual.canais[canal - 1][loadingKey] = false;
       this.cdr.detectChanges();
     };
 
-    this.esp.pulseMotor(direcao, valvula.id, canal).subscribe({
+    this.esp.pulseMotor(direcao, valvula.id, canal).pipe(
+      timeout(5000)
+    ).subscribe({
       next: (resp) => {
         console.log(`Motor acionado: no ${valvula.id} canal ${canal} dir ${direcao}`, resp);
-        // this.esp.getStatus().subscribe({
-        //   next: (status) => {
-        //     this.statusConfirmouNosAtivos = Array.isArray(status) && status.length > 0;
-        //     this.atualizarValvulas(status);
-        //   },
-        //   error: (err) => console.error('Erro ao atualizar status após acionar motor:', err)
-        // });
+        const canalLetra = this.nomeCanal(canal);
+        if (this.pulsoFoiAceito(resp)) {
+          const acao = direcao === 'cw' ? 'LIGADA' : 'DESLIGADA';
+          void this.mostrarToast(
+            `A válvula ${valvula.id} - ${canalLetra} foi ${acao}!`,
+            'success'
+          );
+        } else {
+          const detalhe = this.detalheRespostaPulso(resp);
+          void this.mostrarToast(
+            detalhe
+              ? `Não foi possível acionar a válvula ${valvula.nome} - canal ${canalLetra}: ${detalhe}`
+              : `Não foi possível ${direcao === 'cw' ? 'ligar' : 'desligar'} a válvula ${valvula.nome} - canal ${canalLetra}.`,
+            'danger'
+          );
+        }
         setTimeout(resetarLoading, TEMPO_PROGRESSO_MS);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erro ao acionar motor:', err);
+        const acao = direcao === 'cw' ? 'ligar' : 'desligar';
+        void this.mostrarToast(
+          err instanceof TimeoutError
+            ? `A válvula ${valvula.id} - ${this.nomeCanal(canal)} não confirmou que foi ${direcao === 'cw' ? 'ligada' : 'desligada'}.`
+            : `Erro ao ${acao} a válvula ${valvula.id} - ${this.nomeCanal(canal)}. Verifique a conexão e tente novamente.`,
+          'danger'
+        );
         resetarLoading();
       }
     });
   }
 
-  private chaveLoading(direcao: 'cw' | 'acw', canal: 1 | 2): 'loadingLigarC1' | 'loadingDesligarC1' | 'loadingLigarC2' | 'loadingDesligarC2' {
-    if (canal === 1) return direcao === 'cw' ? 'loadingLigarC1' : 'loadingDesligarC1';
-    return direcao === 'cw' ? 'loadingLigarC2' : 'loadingDesligarC2';
+  private nomeCanal(canal: number): string {
+    return ['A', 'B', 'C', 'D'][canal - 1] ?? canal.toString();
   }
 
-  motorDesabilitado(valvula: ValvulaView, canal: 1 | 2): boolean {
+  private pulsoFoiAceito(resposta: string): boolean {
+    const texto = resposta.trim();
+    if (!texto) return false;
+
+    let mensagem = texto;
+    try {
+      const dados: unknown = JSON.parse(texto);
+      if (typeof dados === 'boolean') return dados;
+      if (typeof dados === 'number') return dados > 0;
+      if (typeof dados === 'object' && dados !== null) {
+        const resultado = dados as Record<string, unknown>;
+        for (const chave of ['success', 'ok', 'accepted']) {
+          if (typeof resultado[chave] === 'boolean') return resultado[chave] as boolean;
+        }
+        const campos = ['status', 'result', 'message', 'msg', 'error', 'detail'];
+        mensagem = campos
+          .map(chave => resultado[chave])
+          .filter((valor): valor is string => typeof valor === 'string')
+          .join(' ');
+        if (!mensagem) return false;
+      } else if (typeof dados === 'string') {
+        mensagem = dados;
+      }
+    } catch {
+      // Respostas text/plain do firmware também são válidas.
+    }
+
+    const normalizada = mensagem.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    if (/\b(erro|error|fail(?:ed)?|false|invalid|invalido|rejeitad[oa]|recusad[oa]|nao|falh[oa])\b/.test(normalizada)) {
+      return false;
+    }
+
+    return /\b(ok|success|sucesso|enviado|acionad[oa]|ligad[oa]|desligad[oa]|accepted|true)\b/.test(normalizada);
+  }
+
+  private detalheRespostaPulso(resposta: string): string {
+    try {
+      const dados: unknown = JSON.parse(resposta);
+      if (typeof dados === 'string') return dados.trim();
+      if (typeof dados === 'object' && dados !== null) {
+        const resultado = dados as Record<string, unknown>;
+        for (const chave of ['message', 'msg', 'error', 'detail', 'status', 'result']) {
+          if (typeof resultado[chave] === 'string' && resultado[chave].trim()) {
+            return resultado[chave].trim();
+          }
+        }
+      }
+    } catch {
+      // Usa a própria resposta quando não for JSON.
+    }
+
+    return resposta.trim().slice(0, 160);
+  }
+
+  private async mostrarToast(message: string, color: 'success' | 'danger'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 3500,
+      position: 'bottom',
+    });
+    await toast.present();
+  }
+
+  motorDesabilitado(valvula: ValvulaView): boolean {
     if (!this.connected || !this.nodesAcordados) return true;
-    const motorDoCanalAtivo = canal === 1
-      ? valvula.loadingLigarC1 || valvula.loadingDesligarC1
-      : valvula.loadingLigarC2 || valvula.loadingDesligarC2;
-    const motorDoOutroCanalAtivo = canal === 1
-      ? valvula.loadingLigarC2 || valvula.loadingDesligarC2
-      : valvula.loadingLigarC1 || valvula.loadingDesligarC1;
-
-    return motorDoCanalAtivo || motorDoOutroCanalAtivo;
+    return valvula.canais.some(c => c.loadingLigar || c.loadingDesligar);
   }
 
-  adicionarAgendamento(valvula: ValvulaView, canal: 1 | 2) {
-    const horaLigar = canal === 1 ? valvula.novoHoraLigarC1 : valvula.novoHoraLigarC2;
-    const horaDesligar = canal === 1 ? valvula.novoHoraDesligarC1 : valvula.novoHoraDesligarC2;
+  adicionarAgendamento(valvula: ValvulaView, canal: Canal) {
+    const canalView = valvula.canais[canal - 1];
+    const horaLigar = canalView.novoHoraLigar;
+    const horaDesligar = canalView.novoHoraDesligar;
 
     if (!horaLigar || !horaDesligar) {
       alert('Preencha os horários de Ligar e Desligar.');
@@ -399,23 +555,20 @@ export class HomePage implements OnInit, OnDestroy {
         });
         this.adicionadosPendentes.set(chave, provisorios);
 
-        if (canal === 1) {
-          valvula.agendamentosCanal1 = this.reconciliarComPendentes(valvula.id, 1,
-            valvula.agendamentosCanal1.filter(p => !p.pendente));
-          valvula.novoHoraLigarC1 = '';
-          valvula.novoHoraDesligarC1 = '';
-        } else {
-          valvula.agendamentosCanal2 = this.reconciliarComPendentes(valvula.id, 2,
-            valvula.agendamentosCanal2.filter(p => !p.pendente));
-          valvula.novoHoraLigarC2 = '';
-          valvula.novoHoraDesligarC2 = '';
-        }
+        canalView.agendamentos = this.reconciliarComPendentes(
+          valvula.id,
+          canal,
+          canalView.agendamentos.filter(p => !p.pendente)
+        );
+        canalView.novoHoraLigar = '';
+        canalView.novoHoraDesligar = '';
         this.cdr.detectChanges();
       });
     });
   }
 
-  deletarDupla(valvula: ValvulaView, par: AgendamentoPar, canal: 1 | 2) {
+  deletarDupla(valvula: ValvulaView, par: AgendamentoPar, canal: Canal) {
+    const canalView = valvula.canais[canal - 1];
     const excluirLigar = par.idLigar !== undefined
       ? this.esp.deletarAgendamento(valvula.id, par.idLigar)
       : null;
@@ -438,13 +591,11 @@ export class HomePage implements OnInit, OnDestroy {
       ));
     }
 
-    if (canal === 1) {
-      valvula.agendamentosCanal1 = this.reconciliarComPendentes(valvula.id, 1,
-        valvula.agendamentosCanal1.filter(p => p !== par || !p.pendente));
-    } else {
-      valvula.agendamentosCanal2 = this.reconciliarComPendentes(valvula.id, 2,
-        valvula.agendamentosCanal2.filter(p => p !== par || !p.pendente));
-    }
+    canalView.agendamentos = this.reconciliarComPendentes(
+      valvula.id,
+      canal,
+      canalView.agendamentos.filter(p => p !== par || !p.pendente)
+    );
     this.cdr.detectChanges();
 
     const prosseguir = () => {

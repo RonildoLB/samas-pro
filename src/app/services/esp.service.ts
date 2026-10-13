@@ -8,7 +8,7 @@ export interface SchedulingRaw {
   hr: number;
   min: number;
   dir: number;   // 1 = ligar (cw) | 2 = desligar (acw)
-  canal: number; // 1 ou 2
+  canal: number; // 1 a 4
   prio: number;
 }
 
@@ -18,6 +18,8 @@ export interface NodeStatus {
   ID_valve: number;
   estado_canal_1: number; // 0/1 - aberto ou fechado
   estado_canal_2: number;
+  estado_canal_3?: number;
+  estado_canal_4?: number;
   clock_updated: boolean;
   clock: string; // "DD/MM/AAAA HH:mm:ss"
   schedulings: SchedulingRaw[];
@@ -55,7 +57,7 @@ export class EspService {
   }
 
   private get baseUrl(): string {
-    return `http://${this.getHost()}`;
+    return `https://${this.getHost()}`;
   }
 
   setTime(dia: number, mes: number, ano: number, hora: number, min: number, seg: number) {
@@ -92,7 +94,9 @@ export class EspService {
   // Aciona um pulso em tempo real num nó/canal específico.
   // dir: 'cw' (ligar) ou 'acw' (desligar) | id: numero do nó | canal: 1 ou 2
   pulseMotor(dir: 'cw' | 'acw', id: number, canal: number) {
-    return this.http.get(`${this.baseUrl}/pulse/${dir}/${id}?canal=${canal}`);
+    return this.http.get(`${this.baseUrl}/pulse/${dir}/${id}?canal=${canal}`, {
+      responseType: 'text',
+    });
   }
 
   // Agendamento agora é por nó (targetId na URL) e inclui o canal.
