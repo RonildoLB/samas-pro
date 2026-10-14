@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, HostListener, PLATFORM_ID, Inject } from '@angular/core'; // Adicione OnInit, OnDestroy, HostListener, PLATFORM_ID, Inject
 import { isPlatformBrowser, CommonModule } from '@angular/common'; // Adicione isPlatformBrowser
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { SwPush, SwUpdate } from '@angular/service-worker';
+import { NodeVisibilityService } from './services/node-visibility.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -14,7 +15,11 @@ import {
   IonMenu, 
   IonMenuToggle,
   IonTitle, 
-  IonToolbar } from '@ionic/angular';
+  IonToolbar,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonToggle } from '@ionic/angular';
 import { IonIcon } from '@ionic/angular';
 import { menu } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
@@ -25,7 +30,6 @@ import { logoIonic } from 'ionicons/icons';
   standalone: true,
   imports: [
     RouterOutlet,
-    RouterLink,
     CommonModule,
     IonButtons, 
     IonButton,
@@ -35,6 +39,10 @@ import { logoIonic } from 'ionicons/icons';
     IonMenuToggle,
     IonTitle, 
     IonToolbar,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonToggle,
     IonHeader, 
     IonToolbar, 
     IonTitle, 
@@ -52,14 +60,25 @@ export class AppComponent implements OnInit, OnDestroy {
   private deferredInstallPrompt: any = null; // Para guardar o evento 'beforeinstallprompt'
   showInstallButton = false; // Controla a visibilidade do seu botão customizado
   private isBrowser: boolean;
+  readonly nodes$: NodeVisibilityService['nodes$'];
 
   constructor(
     private pushSw: SwPush,
     private update: SwUpdate,
     private snackBar: MatSnackBar,
+    private nodeVisibility: NodeVisibilityService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+    this.nodes$ = this.nodeVisibility.nodes$;
+  }
+
+  isNodeVisible(nodeId: number): boolean {
+    return this.nodeVisibility.isNodeVisible(nodeId);
+  }
+
+  setNodeVisible(nodeId: number, visible: boolean): void {
+    this.nodeVisibility.setNodeVisible(nodeId, visible);
   }
 
   ngOnInit(): void {

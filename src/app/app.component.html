@@ -1,6 +1,29 @@
 <ion-menu side="start" contentId="main-content">
-
-  <ion-content class="ion-padding">Versão 1.1.0</ion-content>
+  <ion-content>
+    <ion-list>
+      @if (nodes$ | async; as nodes) {
+        @for (node of nodes; track node.ID_valve) {
+          <ion-item>
+            <ion-label>
+              <h2>POSTE {{ node.ID_valve }}</h2>
+              <p>{{ node.name_valve }}</p>
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [checked]="isNodeVisible(node.ID_valve)"
+              [attr.aria-label]="'Exibir POSTE ' + node.ID_valve"
+              (ionChange)="setNodeVisible(node.ID_valve, $event.detail.checked)">
+            </ion-toggle>
+          </ion-item>
+        } @empty {
+          <ion-item>
+            <ion-label>Nenhum node encontrado.</ion-label>
+          </ion-item>
+        }
+      }
+    </ion-list>
+    <div class="ion-padding">Versão 1.1.0</div>
+  </ion-content>
 </ion-menu>
 <div class="ion-page" id="main-content">
   <ion-header>

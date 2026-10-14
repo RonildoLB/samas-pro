@@ -1,13 +1,8 @@
-import { IonAccordion, IonAccordionGroup, IonItem, IonLabel,
-  IonContent, IonProgressBar, IonIcon, 
-  IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
-  IonCardTitle, IonButton, IonDatetime, IonDatetimeButton, 
-  IonModal, RefresherCustomEvent, IonRefresherContent,
-  IonRefresher, IonList, ToastController
-} from '@ionic/angular';
+import { IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonContent, IonProgressBar, IonIcon, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonButton, RefresherCustomEvent, IonRefresherContent, IonRefresher, ToastController } from '@ionic/angular';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject, NgZone, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { EspService, NodeStatus, SchedulingRaw } from '../../services/esp.service';
+import { NodeVisibilityService } from '../../services/node-visibility.service';
 import { FormsModule } from '@angular/forms';
 import { timer, Subscription, of, timeout, TimeoutError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
@@ -90,13 +85,11 @@ interface ValvulaView {
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   imports: [IonContent, IonButton, FormsModule,
-    IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, 
-    IonCardTitle, IonProgressBar, IonIcon, 
-    NgxColorsComponent, NgxColorsTriggerDirective, IonDatetime, 
-    IonDatetimeButton, IonModal, IonAccordion, IonAccordionGroup,
+    IonCard, IonCardContent, IonCardHeader, IonCardSubtitle,
+    IonCardTitle, IonProgressBar, IonIcon,
+    NgxColorsComponent, NgxColorsTriggerDirective, IonAccordion, IonAccordionGroup,
     IonItem, IonLabel, IonRefresherContent, IonRefresher,
-    IonList, SelectModule
-  ],
+    SelectModule],
 })
 
 export class HomePage implements OnInit, OnDestroy {
@@ -134,6 +127,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private esp: EspService,
+    private nodeVisibility: NodeVisibilityService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private toastController: ToastController,
@@ -151,6 +145,10 @@ export class HomePage implements OnInit, OnDestroy {
 
   get nodesAcordados(): boolean {
     return this.dentroDaJanelaRelogio || this.statusConfirmouNosAtivos;
+  }
+
+  get valvulasVisiveis(): ValvulaView[] {
+    return this.valvulas.filter(valvula => this.nodeVisibility.isNodeVisible(valvula.id));
   }
 
   ngOnInit() {
@@ -199,6 +197,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private atualizarValvulas(lista: NodeStatus[]) {
+    this.nodeVisibility.setNodes(lista);
     this.connected = Array.isArray(lista) && lista.length > 0;
 
     this.valvulas = (lista || []).map((no) => {

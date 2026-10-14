@@ -8,7 +8,7 @@
     <h4 class="center">Buscando válvulas na malha...</h4>
   }
 
-  @for (valvula of valvulas; track valvula.id) {
+  @for (valvula of valvulasVisiveis; track valvula.id) {
     <ion-card color="light" style="border: 1px solid #a5a1a1aa;"
       [style.background]="'color-mix(in srgb, ' + valvula.color + ' 25%, transparent)'">
       <ion-card-header class="card-header" [style.background]="valvula.color" translucent="true">
